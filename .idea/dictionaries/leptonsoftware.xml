@@ -1,0 +1,32 @@
+<component name="ProjectDictionaryState">
+  <dictionary name="leptonsoftware">
+    <words>
+      <w>bicubic</w>
+      <w>bilinear</w>
+      <w>coef</w>
+      <w>conv</w>
+      <w>crowdai</w>
+      <w>dataflow</w>
+      <w>datagen</w>
+      <w>dataset</w>
+      <w>deconv</w>
+      <w>filepath</w>
+      <w>jaccard</w>
+      <w>joblib</w>
+      <w>keras</w>
+      <w>lanczos</w>
+      <w>pred</w>
+      <w>preprocess</w>
+      <w>preprocessing</w>
+      <w>pretrained</w>
+      <w>progbar</w>
+      <w>pytorch</w>
+      <w>relu</w>
+      <w>sklearn</w>
+      <w>steppy</w>
+      <w>unet</w>
+      <w>yaml</w>
+      <w>zeropadding</w>
+    </words>
+  </dictionary>
+</component>
