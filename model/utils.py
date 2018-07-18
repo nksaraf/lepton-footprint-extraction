@@ -1,17 +1,17 @@
+import os
 import random
 import threading
 
-import os
-import numpy as np
-import joblib
 import cv2
+import joblib
+import numpy as np
 import pandas as pd
-from keras.utils import Sequence
 from imageio import imread, imwrite
-from tensorflow.python.lib.io import file_io
 from keras.callbacks import Callback
-from connections import Transformer
+from keras.utils import Sequence
+from tensorflow.python.lib.io import file_io
 
+from connections import Transformer
 
 INTERPOLATION_METHODS = {
     'nearest': cv2.INTER_NEAREST,

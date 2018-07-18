@@ -1,6 +1,6 @@
+import numpy as np
 from keras import backend as K
 from keras.losses import binary_crossentropy
-import numpy as np
 
 
 def weighted_cross_entropy(target, output, weights_function=None):
@@ -61,7 +61,7 @@ def _get_size_weights(sizes, C):
 
 
 def mixed_iou_cross_entropy_loss(output, target, iou_weight=0.5, iou_loss_func=None,
-                                  cross_entropy_weight=0.5, cross_entropy_loss_func=None):
+                                 cross_entropy_weight=0.5, cross_entropy_loss_func=None):
     """Calculate mixed Dice and Cross Entropy Loss.
 
     Args:

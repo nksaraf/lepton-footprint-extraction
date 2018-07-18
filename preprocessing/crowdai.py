@@ -1,16 +1,17 @@
 from __future__ import absolute_import
 
-import json
-import os
-import logging
-import joblib
-import imageio
-import apache_beam as beam
-from apache_beam.io.filesystems import FileSystems
-from apache_beam import pvalue
 import argparse
-import numpy as np
+import json
+import logging
+import os
+
+import apache_beam as beam
 import cv2
+import imageio
+import joblib
+import numpy as np
+from apache_beam import pvalue
+from apache_beam.io.filesystems import FileSystems
 from pycocotools import mask as cocomask
 from scipy import ndimage as ndi
 from scipy.ndimage.morphology import distance_transform_edt

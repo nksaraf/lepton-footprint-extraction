@@ -1,7 +1,8 @@
 from __future__ import print_function
 
-import os
 import argparse
+import os
+
 from preprocessing import crowdai, csv_utils
 
 PROJECT_ID = 'lepton-maps-207611'

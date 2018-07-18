@@ -1,7 +1,8 @@
+import os
+
+from model.base import UNetTrainer
 from model.loaders import ImageDataLoaderResize
 from model.utils import CSVLoader
-from model.base import UNetTrainer
-import os
 
 
 def train_pipeline(plug, config, logger):

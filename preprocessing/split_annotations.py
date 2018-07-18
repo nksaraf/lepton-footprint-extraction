@@ -1,7 +1,8 @@
 import json
 import os
-from tqdm import tqdm
+
 from pycocotools.coco import COCO
+from tqdm import tqdm
 
 
 def run():

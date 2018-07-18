@@ -10,6 +10,7 @@
       <w>datagen</w>
       <w>dataset</w>
       <w>deconv</w>
+      <w>denormalize</w>
       <w>filepath</w>
       <w>jaccard</w>
       <w>joblib</w>

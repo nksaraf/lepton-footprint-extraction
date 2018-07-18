@@ -1,8 +1,9 @@
-from keras.layers import Conv2D, Conv2DTranspose, Concatenate, MaxPooling2D, UpSampling2D, Dropout, add
+from keras.layers import Concatenate, Conv2D, Conv2DTranspose, Dropout, MaxPooling2D, UpSampling2D, add
 from keras.models import Input, Model
 from keras.regularizers import l2
-from resnet101 import ResNet101
+
 from connections import get_logger
+from resnet101 import ResNet101
 
 logger = get_logger()
 

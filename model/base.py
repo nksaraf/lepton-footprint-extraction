@@ -1,21 +1,22 @@
-from functools import partial, update_wrapper
-from abc import abstractmethod
-from abc import ABCMeta as AbstractClass
 import os
+from abc import ABCMeta, abstractmethod
+from functools import partial, update_wrapper
+
+from keras.callbacks import EarlyStopping, ProgbarLogger, ReduceLROnPlateau, TensorBoard
 from keras.models import load_model
 from keras.optimizers import Adam
 from keras.utils import multi_gpu_model
-from keras.callbacks import ProgbarLogger, ReduceLROnPlateau, EarlyStopping, TensorBoard
 
 from connections import Transformer
-from model.loss import mixed_iou_cross_entropy_loss, get_weights, jaccard_index_loss, weighted_cross_entropy, jaccard_index, dice_coef
-from model.unet import UNetResNet101
+from model.loss import dice_coef, get_weights, jaccard_index, jaccard_index_loss, mixed_iou_cross_entropy_loss, \
+    weighted_cross_entropy
 from model.resnet101 import Scale
-from model.utils import save_model, save_model_weights, ModelCheckpoint
+from model.unet import UNetResNet101
+from model.utils import ModelCheckpoint, save_model, save_model_weights
 
 
 class Model(Transformer):
-    __metaclass__ = AbstractClass
+    __metaclass__ = ABCMeta
 
     def __init__(self, name, architecture_config, training_config, callbacks_config):
         super(Model, self).__init__(name, need_setup=True)
@@ -81,7 +82,7 @@ class Model(Transformer):
 
 
 class AbstractXYTrainer(Model):
-    __metaclass__ = AbstractClass
+    __metaclass__ = ABCMeta
     __out__ = ('model',)
 
     def __transform__(self, x, y, validation_data):
@@ -97,7 +98,7 @@ class AbstractXYTrainer(Model):
 
 
 class AbstractGeneratorTrainer(Model):
-    __metaclass__ = AbstractClass
+    __metaclass__ = ABCMeta
     __out__ = ('model',)
 
     def __transform__(self, datagen, validation_datagen):

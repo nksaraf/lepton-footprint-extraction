@@ -1,7 +1,7 @@
 import os
 
 from connections import Wire
-from model.loss import jaccard_index, dice_coef
+from model.loss import dice_coef, jaccard_index
 
 # CONFIG_FILEPATH = 'pipeline.yaml'
 #

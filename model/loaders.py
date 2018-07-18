@@ -2,11 +2,12 @@ import os
 
 import numpy as np
 from attrdict import AttrDict
+
 import model.transforms as transforms
-from model.utils import Iterator, load_image, load_joblib
-from model.transforms import fix_shape_after_transform, fix_shape_before_transform, fast_seq, image_seq, Augmenter
-from connections import Transformer
 from config import MEAN, STD
+from connections import Transformer
+from model.transforms import Augmenter, fast_seq, fix_shape_after_transform, fix_shape_before_transform, image_seq
+from model.utils import Iterator, load_image, load_joblib
 
 
 class ImageDataGenerator(Iterator):

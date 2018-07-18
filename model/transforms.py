@@ -1,13 +1,13 @@
 from __future__ import division
 
 import math
-import random
-import cv2
 import numbers
-import numpy as np
+import random
 import types
-from abc import abstractmethod
-from abc import ABCMeta as AbstractClass
+from abc import ABCMeta, abstractmethod
+
+import cv2
+import numpy as np
 from imgaug import augmenters as iaa
 
 fast_seq = iaa.SomeOf((2, 4),
@@ -24,30 +24,6 @@ image_seq = iaa.SomeOf((1, 2),
                        random_order=True)
 
 
-class Augmenter:
-    def __init__(self, augmenters):
-        if not isinstance(augmenters, list):
-            augmenters = [augmenters]
-        self.augmenters = augmenters
-        self.seq_det = None
-
-    def _pre_call_hook(self):
-        seq = iaa.Sequential(self.augmenters)
-        seq.reseed()
-        self.seq_det = seq.to_deterministic()
-
-    def transform(self, *images):
-        augmented = [self.seq_det.augment_image(image) for image in images]
-        if len(augmented) == 1:
-            return augmented[0]
-        else:
-            return augmented
-
-    def __call__(self, *args):
-        self._pre_call_hook()
-        return self.transform(*args)
-
-
 INTERPOLATION_METHODS = {
     'nearest': cv2.INTER_NEAREST,
     'bilinear': cv2.INTER_LINEAR,
@@ -57,18 +33,42 @@ INTERPOLATION_METHODS = {
 }
 
 
-class Transform(object):
-    __metaclass__ = AbstractClass
+class ImageTransform(object):
+    __metaclass__ = ABCMeta
+
+    def _setup(self):
+        pass
 
     @abstractmethod
     def transform(self, img):
         return img
 
-    def __call__(self, img):
-        return self.transform(img)
+    def __call__(self, *images):
+        self._setup()
+        transformed = [self.transform(image) for image in images]
+        if len(transformed) == 1:
+            return transformed[0]
+        else:
+            return transformed
 
 
-class Compose(Transform):
+class Augmenter(ImageTransform):
+    def __init__(self, augmenters):
+        if not isinstance(augmenters, list):
+            augmenters = [augmenters]
+        self.augmenters = augmenters
+        self.seq_det = None
+
+    def _setup(self):
+        seq = iaa.Sequential(self.augmenters)
+        seq.reseed()
+        self.seq_det = seq.to_deterministic()
+
+    def transform(self, img):
+        self.seq_det.augment_image(img)
+
+
+class Compose(ImageTransform):
     """Composes several transforms together.
 
     Args:
@@ -84,7 +84,7 @@ class Compose(Transform):
         return img
 
 
-class Normalize(Transform):
+class Normalize(ImageTransform):
     """Normalize an tensor image with mean and standard deviation.
 
     Given mean: (R, G, B) and std: (R, G, B),
@@ -114,7 +114,7 @@ class Normalize(Transform):
         return ((img / 255.).astype(np.float32) - self.mean) / self.std
 
 
-class Denormalize(Transform):
+class Denormalize(ImageTransform):
     """Normalize an tensor image with mean and standard deviation.
 
     Given mean: (R, G, B) and std: (R, G, B),
@@ -144,7 +144,7 @@ class Denormalize(Transform):
         return (((img * self.std) + self.mean) * 255).astype(np.uint8)
 
 
-class Resize(Transform):
+class Resize(ImageTransform):
     """Rescale the input image as numpy array to the given size.
 
     Args:
@@ -169,7 +169,7 @@ class Resize(Transform):
         return cv2.resize(img, self.size, interpolation=INTERPOLATION_METHODS[self.interpolation])
 
 
-class CenterCrop(Transform):
+class CenterCrop(ImageTransform):
     """Crops the given PIL.Image at the center.
 
     Args:
@@ -199,7 +199,7 @@ class CenterCrop(Transform):
         return img[y1:y1 + th, x1:x1 + tw]
 
 
-class Pad(Transform):
+class Pad(ImageTransform):
     """Pad the given PIL.Image on all sides with the given "pad" value.
 
     Args:
@@ -224,7 +224,7 @@ class Pad(Transform):
         return cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, self.fill)
 
 
-class Lambda(Transform):
+class Lambda(ImageTransform):
     """Apply a user-defined lambda as a transform.
 
     Args:
@@ -239,7 +239,7 @@ class Lambda(Transform):
         return self.func(img)
 
 
-class RandomCrop(Transform):
+class RandomCrop(ImageTransform):
     """Crop the given numpy image at a random location.
 
     Args:
@@ -281,7 +281,7 @@ class RandomCrop(Transform):
         return img[y1:y1 + th, x1:x1 + tw]
 
 
-class RandomHorizontalFlip(Transform):
+class RandomHorizontalFlip(ImageTransform):
     """Horizontally flip the given PIL.Image randomly with a probability of 0.5."""
 
     def transform(self, img):
@@ -297,7 +297,7 @@ class RandomHorizontalFlip(Transform):
         return img
 
 
-class RandomSizedCrop(Transform):
+class RandomSizedCrop(ImageTransform):
     """Crop the given PIL.Image to random size and aspect ratio.
 
     A crop of random size of (0.08 to 1.0) of the original size and a random
@@ -341,7 +341,7 @@ class RandomSizedCrop(Transform):
         return crop(scale(img))
 
 
-class Flip(Transform):
+class Flip(ImageTransform):
     """
         Flips image in given direction
         0 - horizontal, 1

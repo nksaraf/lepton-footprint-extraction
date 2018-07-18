@@ -1,8 +1,12 @@
-from attrdict import AttrDict
 import inspect
-import types
 import logging
 import sys
+import types
+from abc import ABCMeta, abstractmethod, abstractproperty
+
+from attrdict import AttrDict
+
+LOGGER = 'log'
 
 
 class Wire(AttrDict):
@@ -41,7 +45,11 @@ class Wire(AttrDict):
 
 
 class Transformer(object):
-    __out__ = tuple()
+    @abstractproperty
+    def __out__(self):
+        return tuple()
+
+    __metaclass__ = ABCMeta
 
     def __init__(self, name='transformer', logger=None, need_setup=False):
         self.name = name.upper()
@@ -51,18 +59,18 @@ class Transformer(object):
             self.logger = logger
         self.is_setup = not need_setup
 
-    def _params(self):
-        return {}
-
-    def __inputs__(self):
+    @property
+    def inputs(self):
         return inspect.getargspec(self.__transform__)[0][1:]
 
-    def __outputs__(self):
+    @property
+    def outputs(self):
         return self.__class__.__out__
 
     def __setup__(self, **kwargs):
         pass
 
+    @abstractmethod
     def __transform__(self, **kwargs):
         raise NotImplementedError
 
@@ -78,20 +86,23 @@ class Transformer(object):
             self.logger.info('Connecting {}'.format(self.__str__()))
             return self.__transform__(**kwargs)
 
+    def connect(self, wire):
+        _connect(self, wire)
+
     def __call__(self, wire):
         return _connect(self, wire)
 
     def log(self, msg):
-        pre = ' ' * len('Connecting ') + ('{}: '.format(self.name))
+        pre = (' ' * len('Connecting ')) + ('{}: '.format(self.name))
         self.logger.info(pre + msg)
 
     def __repr__(self):
         return "{}: ({}) ==> {}{} ==> ({})".format(
             self.name,
-            ', '.join(self.__inputs__()),
+            ', '.join(self.inputs),
             self.__class__.__name__,
             '' if self.is_setup else '(needs setup)',
-            ', '.join(self.__outputs__()))
+            ', '.join(self.outputs))
 
     def __str__(self):
         return self.__repr__()
@@ -99,22 +110,17 @@ class Transformer(object):
 
 def _connect(transformer, wire):
     if isinstance(transformer, Transformer):
-        inputs = transformer.__inputs__()
+        inputs = transformer.inputs
         func = transformer.transform
-        name = transformer.name
     elif isinstance(transformer, types.FunctionType):
         inputs = inspect.getargspec(transformer)[0]
         func = transformer
-        name = 'transformer'
     else:
         raise InvalidAdapterError
 
     plug = {}
     for key in inputs:
-        if key not in wire:
-            plug[key] = None
-            print("\tWarning: {key} not found in input to {name}".format(key=key, name=name))
-        else:
+        if key in wire:
             plug[key] = wire[key]
     return Wire(func(**plug))
 
@@ -134,25 +140,21 @@ class TransformerNotSetupError(BaseException):
 def init_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
-    message_format = logging.Formatter(fmt='%(asctime)s %(name)s >>> %(message)s',
-                                       datefmt='%H:%M:%S')
+    message_format = logging.Formatter(fmt='%(asctime)s %(name)s >>> %(message)s', datefmt='%H:%M:%S')
 
-    # console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(fmt=message_format)
-
-    # add the handlers to the logger
     logger.addHandler(console_handler)
 
     return logger
 
 
 def get_logger():
-    return logging.getLogger('log')
+    return logging.getLogger(LOGGER)
 
 
-init_logger('log')
+init_logger(LOGGER)
 
 
 # class Adapter(object):

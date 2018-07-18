@@ -1,13 +1,15 @@
 from __future__ import print_function
 
 import argparse
-from model.config import create_config
-from model.utils import CSVLoader
-from model.loaders import ImageDataLoaderResize
-from model.base import UNetTrainer
-from connections import Wire, get_logger
 import os
+
 from tensorflow.python.lib.io import file_io
+
+from connections import Wire, get_logger
+from model.base import UNetTrainer
+from model.config import create_config
+from model.loaders import ImageDataLoaderResize
+from model.utils import CSVLoader
 
 logger = get_logger()
 

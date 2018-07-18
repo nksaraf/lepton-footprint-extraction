@@ -8,8 +8,7 @@ This behavior is triggered by specifying the --setup_file command line option
 when running the workflow for remote execution.
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 
 import subprocess
 from distutils.command.build import build as _build
