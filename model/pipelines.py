@@ -1,6 +1,6 @@
 import os
 
-from model.base import UNetTrainer
+from trainer.model import UNetTrainer
 from model.loaders import ImageDataLoaderResize
 from model.utils import CSVLoader
 
@@ -47,6 +47,6 @@ def predict_pipeline(plug, config):
                                                                                      y_valid=xy_valid.y)
 
     unet = UNetTrainer('unet_resnet101', **config.unet)
-    unet.log("Loading trained model for {name}")
-    unet.setup(model_path=os.path.join(config.working_dir, 'model.h5'))
+    unet.log("Loading trained base.py for {name}")
+    unet.setup(model_path=os.path.join(config.working_dir, 'base.py.h5'))
     return unet, loader

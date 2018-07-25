@@ -7,6 +7,24 @@ MAIN_TRAINER_MODULE="trainer.train"
 JOB_DIR="gs://lepton/jobs/$JOB_NAME"
 PACKAGE_STAGING_PATH="gs://lepton"
 DATA_DIR="gs://lepton/data/csv"
+BASE_BATCH_SIZE=32
+GPUS=1
+((BATCH_SIZE=$BASE_BATCH_SIZE*$GPUS))
+
+#gcloud ml-engine jobs submit training $JOB_NAME  \
+#    --package-path $TRAINER_PACKAGE_PATH \
+#    --module-name $MAIN_TRAINER_MODULE \
+#    --staging-bucket $PACKAGE_STAGING_PATH \
+#    --job-dir $JOB_DIR \
+#    --config config.yaml \
+#    --stream-logs --\
+#    --data-dir  $DATA_DIR \
+#    --batch-size-train $BATCH_SIZE \
+#    --batch-size-val $BATCH_SIZE \
+#    --epochs 100 \
+#    --gpus $GPUS \
+#    --base.py unet
+
 
 gcloud ml-engine jobs submit training $JOB_NAME  \
     --package-path $TRAINER_PACKAGE_PATH \
@@ -16,9 +34,11 @@ gcloud ml-engine jobs submit training $JOB_NAME  \
     --config config.yaml \
     --stream-logs --\
     --data-dir  $DATA_DIR \
-    --batch-size-train 80 \
-    --batch-size-val 80 \
-    --epochs 100
+    --batch-size-train $BATCH_SIZE \
+    --batch-size-val $BATCH_SIZE \
+    --epochs 10 \
+    --gpus $GPUS \
+    --model unet
 
 
 # gcloud ml-engine local train --package-path trainer \

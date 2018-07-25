@@ -126,7 +126,7 @@ setuptools.setup(
     version='0.0.1',
     description='Lepton building extraction.',
     install_requires=REQUIRED_PACKAGES,
-    packages=['model', 'trainer'],
+    packages=['model', 'trainer', 'postprocessing'],
     cmdclass={
         'build': build,
         'CustomCommands': CustomCommands,

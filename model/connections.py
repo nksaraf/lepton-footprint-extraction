@@ -45,10 +45,6 @@ class Wire(AttrDict):
 
 
 class Transformer(object):
-    @abstractproperty
-    def __out__(self):
-        return tuple()
-
     __metaclass__ = ABCMeta
 
     def __init__(self, name='transformer', logger=None, need_setup=False):
@@ -58,6 +54,10 @@ class Transformer(object):
         else:
             self.logger = logger
         self.is_setup = not need_setup
+
+    @abstractproperty
+    def __out__(self):
+        return tuple()
 
     @property
     def inputs(self):
@@ -76,6 +76,7 @@ class Transformer(object):
 
     def setup(self, **kwargs):
         self.is_setup = True
+        self.logger.info('Setting up {}'.format(self.__str__()))
         self.__setup__(**kwargs)
         return self
 

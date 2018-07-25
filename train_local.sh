@@ -24,6 +24,8 @@
 python2 -i -m trainer.train \
     --data-dir data/bang \
     --job-dir working \
-    --batch-size-train 1 \
-    --batch-size-val 1 \
-    --epochs 1 -l -d
+    --batch-size-train 10 \
+    --batch-size-val 10 \
+    --model unet \
+    --model-path data/model.h5 \
+    --epochs 1 --gpus 1 -l -d

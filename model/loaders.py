@@ -5,7 +5,7 @@ from attrdict import AttrDict
 
 import model.transforms as transforms
 from config import MEAN, STD
-from connections import Transformer
+from model.connections import Transformer
 from model.transforms import Augmenter, fast_seq, fix_shape_after_transform, fix_shape_before_transform, image_seq
 from model.utils import Iterator, load_image, load_joblib
 
@@ -178,3 +178,16 @@ class ImageDataLoaderResize(ImageDataLoaderBasic):
 
         self.image_augment_with_target_train = Augmenter(fast_seq)
         self.image_augment_train = Augmenter(image_seq)
+
+
+class ImageDataLoaderResizeTest(ImageDataLoaderBasic):
+    def __init__(self, name, loader_params, dataset_params):
+        super(ImageDataLoaderResizeTest, self).__init__(name, loader_params, dataset_params)
+        self.image_transform = transforms.Compose([transforms.Resize((self.dataset_params.h,
+                                                                     self.dataset_params.w)),
+                                                   transforms.Normalize(mean=MEAN, std=STD),
+                                                   ])
+        self.mask_transform = transforms.Compose([transforms.Resize((self.dataset_params.h,
+                                                                    self.dataset_params.w)),
+                                                  transforms.Normalize(mean=0., std=1.)
+                                                  ])

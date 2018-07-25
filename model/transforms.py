@@ -65,7 +65,7 @@ class Augmenter(ImageTransform):
         self.seq_det = seq.to_deterministic()
 
     def transform(self, img):
-        self.seq_det.augment_image(img)
+        return self.seq_det.augment_image(img)
 
 
 class Compose(ImageTransform):
