@@ -6,16 +6,17 @@ import os
 from tensorflow.python.lib.io import file_io
 
 from model.connections import Wire, get_logger
-from trainer.base import BasicUNetTrainer, UNetResnetTrainer
+from model.base import UNetModel, ResnetUNetModel
+from model.trainer import GeneratorTrainer
 from model.config import create_config
-from model.loaders import ImageDataLoaderResize
+from model.loaders import ImageLoader
 from model.utils import CSVLoader
 
 logger = get_logger()
 
 trainers = {
-    'unet': BasicUNetTrainer,
-    'unet_resnet': UNetResnetTrainer
+    'unet': UNetModel,
+    'unet_resnet': ResnetUNetModel
 }
 
 
@@ -27,14 +28,17 @@ def train_local(config):
     xy_train = plug(filename='train_path') | CSVLoader(name='xy_train', **config.xy_splitter)
     xy_valid = plug(filename='val_path') | CSVLoader(name='xy_valid', **config.xy_splitter)
 
-    loader = (plug + xy_train + xy_valid(x_valid='x', y_valid='y')) | ImageDataLoaderResize('image_resize_loader',
-                                                                                            **config.loader)
+    loader = (plug + xy_train + xy_valid(x_valid='x', y_valid='y')) | ImageLoader('image_resize_loader',
+                                                                                  **config.loader)
 
-    unet = trainers[config.model.name](**config.model)
+    unet = trainers[config.model_name](**config.model)
+    trainer_model = GeneratorTrainer(config.model.name, unet)
     if len(config.model_path) > 0:
-        unet.setup(model_path=config.model_path)
+        trainer_model.setup(model_path=config.model_path)
+    else:
+        trainer_model.setup()
 
-    return loader, unet
+    return loader, trainer_model
     # trained_model = loader | trainers[config.base.py.name](**config.base.py).setup()
 
 
@@ -66,8 +70,8 @@ def train(config):
     xy_train = plug(filename='train_path') | CSVLoader(name='xy_train', **config.xy_splitter)
     xy_valid = plug(filename='val_path') | CSVLoader(name='xy_valid', **config.xy_splitter)
 
-    loader = (plug + xy_train + xy_valid(x_valid='x', y_valid='y')) | ImageDataLoaderResize('image_resize_loader',
-                                                                                            **config.loader)
+    loader = (plug + xy_train + xy_valid(x_valid='x', y_valid='y')) | ImageLoader('image_resize_loader',
+                                                                                  **config.loader)
 
     # unet = UNetTrainer('unet_resnet101', **config.unet).setup()
     # if config:

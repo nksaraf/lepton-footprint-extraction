@@ -1,7 +1,7 @@
 import os
 
 from trainer.model import UNetTrainer
-from model.loaders import ImageDataLoaderResize
+from model.loaders import ImageLoader
 from model.utils import CSVLoader
 
 
@@ -12,11 +12,11 @@ def train_pipeline(plug, config, logger):
     xy_valid = CSVLoader(name='xy_valid', **config.xy_splitter).transform(filename=plug.val_filepath,
                                                                           train_mode=plug.train_mode)
 
-    loader = ImageDataLoaderResize('image_resize_loader', **config.loader).transform(x=xy_train.x,
-                                                                                     y=xy_train.y,
-                                                                                     train_mode=plug.train_mode,
-                                                                                     x_valid=xy_valid.x,
-                                                                                     y_valid=xy_valid.y)
+    loader = ImageLoader('image_resize_loader', **config.loader).transform(x=xy_train.x,
+                                                                           y=xy_train.y,
+                                                                           train_mode=plug.train_mode,
+                                                                           x_valid=xy_valid.x,
+                                                                           y_valid=xy_valid.y)
 
     unet = UNetTrainer('unet_resnet101', **config.unet)
     if config.env.load_model:
@@ -40,11 +40,11 @@ def predict_pipeline(plug, config):
     xy_valid = CSVLoader(name='xy_valid', **config.xy_splitter).transform(filename=plug.val_filepath,
                                                                           train_mode=plug.train_mode)
 
-    loader = ImageDataLoaderResize('image_resize_loader', **config.loader).transform(x=xy_train.x,
-                                                                                     y=xy_train.y,
-                                                                                     train_mode=plug.train_mode,
-                                                                                     x_valid=xy_valid.x,
-                                                                                     y_valid=xy_valid.y)
+    loader = ImageLoader('image_resize_loader', **config.loader).transform(x=xy_train.x,
+                                                                           y=xy_train.y,
+                                                                           train_mode=plug.train_mode,
+                                                                           x_valid=xy_valid.x,
+                                                                           y_valid=xy_valid.y)
 
     unet = UNetTrainer('unet_resnet101', **config.unet)
     unet.log("Loading trained base.py for {name}")

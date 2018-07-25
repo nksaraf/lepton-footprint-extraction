@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-TRAINER_PACKAGE_PATH="./trainer"
+TRAINER_PACKAGE_PATH="./work"
 now=$(date +"%Y%m%d_%H%M%S")
 JOB_NAME="lepton_$now"
-MAIN_TRAINER_MODULE="trainer.train"
+MAIN_TRAINER_MODULE="work.train"
 JOB_DIR="gs://lepton/jobs/$JOB_NAME"
 PACKAGE_STAGING_PATH="gs://lepton"
 DATA_DIR="gs://lepton/data/csv"
@@ -41,8 +41,8 @@ gcloud ml-engine jobs submit training $JOB_NAME  \
     --model unet
 
 
-# gcloud ml-engine local train --package-path trainer \
-# 	--module-name trainer.train --\
+# gcloud ml-engine local train --package-path work \
+# 	--module-name work.train --\
 # 	--train-image-dir $TRAIN_IMAGE_DIR \
 # 	--train-mask-dir $TRAIN_IMAGE_DIR \
 # 	--val-image-dir $VAL_IMAGE_DIR \

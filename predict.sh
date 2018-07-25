@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-python2 -i -m trainer.predict \
+python2 -i -m work.predict \
     --data-dir data/bang \
     --job-dir working \
     --model unet \

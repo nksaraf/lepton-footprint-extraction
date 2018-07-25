@@ -33,7 +33,6 @@ image_h, image_w = (256, 256)
 
 def unet_resnet_config(job_dir, data_dir, epochs, gpus):
     return Wire({'unet_resnet': {
-        'name': 'unet_resnet',
         'architecture_config': {
             'gpus': gpus,
             'model_params': {
@@ -101,7 +100,6 @@ def unet_resnet_config(job_dir, data_dir, epochs, gpus):
 
 def base_unet_config(job_dir, data_dir, epochs, gpus):
     return Wire({
-        'name': 'unet',
         'architecture_config': {
             'gpus': gpus,
             'model_params': {
@@ -222,6 +220,7 @@ def create_config(job_dir,
                 },
             },
         },
+        'model_name': model,
         'model': model_config(model, job_dir, data_dir, epochs, gpus)
     })
 

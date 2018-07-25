@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-#TRAINER_PACKAGE_PATH="./trainer"
+#TRAINER_PACKAGE_PATH="./work"
 #now=$(date +"%Y%m%d_%H%M%S")
 #JOB_NAME="lepton_$now"
-#MAIN_TRAINER_MODULE="trainer.train"
+#MAIN_TRAINER_MODULE="work.train"
 #JOB_DIR="gs://lepton/jobs/$JOB_NAME"
 #PACKAGE_STAGING_PATH="gs://lepton"
 #DATA_DIR="gs://lepton/data"
@@ -21,7 +21,7 @@
 #    --epochs 1 \
 #    -d
 
-python2 -i -m trainer.train \
+python2 -i -m work.train \
     --data-dir data/bang \
     --job-dir working \
     --batch-size-train 10 \

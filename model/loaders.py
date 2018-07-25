@@ -111,21 +111,29 @@ class ImageDataGeneratorXYDistances(ImageDataGeneratorXY):
         return image, mask
 
 
-class ImageDataLoaderBasic(Transformer):
+class AbstractImageLoader(Transformer):
     __out__ = ('datagen', 'validation_datagen')
 
-    def __init__(self, name, loader_params, dataset_params):
-        super(ImageDataLoaderBasic, self).__init__(name=name)
+    def __init__(self, name,
+                 loader_params,
+                 dataset_params,
+                 image_transform=None,
+                 mask_transform=None,
+                 image_augment_with_target_train=None,
+                 image_augment_with_target_inference=None,
+                 image_augment_train=None,
+                 image_augment_inference=None):
+        super(AbstractImageLoader, self).__init__(name=name)
         self.loader_params = AttrDict(loader_params)
         self.dataset_params = AttrDict(dataset_params)
 
-        self.image_transform = None
-        self.mask_transform = None
+        self.image_transform = image_transform
+        self.mask_transform = mask_transform
 
-        self.image_augment_with_target_train = None
-        self.image_augment_with_target_inference = None
-        self.image_augment_train = None
-        self.image_augment_inference = None
+        self.image_augment_with_target_train = image_augment_with_target_train
+        self.image_augment_with_target_inference = image_augment_with_target_inference
+        self.image_augment_train = image_augment_train
+        self.image_augment_inference = image_augment_inference
 
     def __transform__(self, x, y=None, x_valid=None, y_valid=None, train_mode=True):
         if train_mode and y is not None:
@@ -135,7 +143,7 @@ class ImageDataLoaderBasic(Transformer):
 
         if x_valid is not None and y_valid is not None:
             val_gen, val_steps = self._get_datagen(x_valid, y_valid, False,
-                                                  self.dataset_params.distances, self.loader_params.inference)
+                                                   self.dataset_params.distances, self.loader_params.inference)
         else:
             val_gen = None
             val_steps = None
@@ -163,31 +171,28 @@ class ImageDataLoaderBasic(Transformer):
         return datagen, steps
 
 
-class ImageDataLoaderResize(ImageDataLoaderBasic):
+def normalize_resize(h, w, mean=0., std=1.):
+    return transforms.Compose([transforms.Resize((h, w)),
+                               transforms.Normalize(mean=mean, std=std)])
+
+
+class ImageLoader(AbstractImageLoader):
     def __init__(self, name, loader_params, dataset_params):
-        super(ImageDataLoaderResize, self).__init__(name, loader_params, dataset_params)
-
-        self.image_transform = transforms.Compose([transforms.Resize((self.dataset_params.h,
-                                                                     self.dataset_params.w)),
-                                                   transforms.Normalize(mean=MEAN, std=STD),
-                                                   ])
-        self.mask_transform = transforms.Compose([transforms.Resize((self.dataset_params.h,
-                                                                    self.dataset_params.w)),
-                                                  transforms.Normalize(mean=0., std=1.)
-                                                  ])
-
-        self.image_augment_with_target_train = Augmenter(fast_seq)
-        self.image_augment_train = Augmenter(image_seq)
+        super(ImageLoader, self).__init__(name,
+                                          loader_params,
+                                          dataset_params,
+                                          image_transform=normalize_resize(dataset_params.h, dataset_params.w, MEAN,
+                                                                           STD),
+                                          mask_transform=normalize_resize(dataset_params.h, dataset_params.w),
+                                          image_augment_with_target_train=Augmenter(fast_seq),
+                                          image_augment_train=Augmenter(image_seq))
 
 
-class ImageDataLoaderResizeTest(ImageDataLoaderBasic):
+class ImageLoaderTest(AbstractImageLoader):
     def __init__(self, name, loader_params, dataset_params):
-        super(ImageDataLoaderResizeTest, self).__init__(name, loader_params, dataset_params)
-        self.image_transform = transforms.Compose([transforms.Resize((self.dataset_params.h,
-                                                                     self.dataset_params.w)),
-                                                   transforms.Normalize(mean=MEAN, std=STD),
-                                                   ])
-        self.mask_transform = transforms.Compose([transforms.Resize((self.dataset_params.h,
-                                                                    self.dataset_params.w)),
-                                                  transforms.Normalize(mean=0., std=1.)
-                                                  ])
+        super(ImageLoaderTest, self).__init__(name,
+                                              loader_params,
+                                              dataset_params,
+                                              image_transform=normalize_resize(dataset_params.h, dataset_params.w, MEAN,
+                                                                               STD),
+                                              mask_transform=normalize_resize(dataset_params.h, dataset_params.w))

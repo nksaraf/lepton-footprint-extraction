@@ -3,19 +3,19 @@ from __future__ import print_function
 import argparse
 import os
 
-from postprocessing.base import Predictor
+from model.predictor import Predictor
 from postprocessing.utils import ThreeByThreeViewer
 from model.connections import Wire, get_logger
-from trainer.base import BasicUNetTrainer, UNetResnetTrainer
+from model.base import UNetModel, ResnetUNetModel
 from model.config import create_config
-from model.loaders import ImageDataLoaderResizeTest
+from model.loaders import ImageLoaderTest
 from model.utils import CSVLoader
 
 logger = get_logger()
 
-trainers = {
-    'unet': BasicUNetTrainer,
-    'unet_resnet': UNetResnetTrainer
+predictors = {
+    'unet': UNetModel,
+    'unet_resnet': ResnetUNetModel
 }
 
 
@@ -24,13 +24,15 @@ def predict_local(config):
     plug = Wire(filename=os.path.join(config.data_dir, 'val.local.csv'), train_mode=True)
     xy_test = plug | CSVLoader(name='xy_test', **config.xy_splitter)
 
-    loader = ((plug + xy_test) | ImageDataLoaderResizeTest('image_loader', **config.loader)).datagen[0]
+    loader = ((plug + xy_test) | ImageLoaderTest('image_loader', **config.loader)).datagen[0]
 
-    unet = trainers[config.model.name](**config.model)
+    unet = predictors[config.model_name](**config.model)
+    predictor = Predictor('unet_predictor', unet, 'predict')
     if len(config.model_path) > 0:
-        unet.setup(model_path=config.model_path)
+        predictor.setup(model_path=config.model_path)
+    else:
+        raise Exception("No model path provided")
 
-    predictor = Predictor('unet_predictor', 'predict').setup(model=unet.model)
     x, y = loader.next()
 
     batch = Wire(x=x, y=y)
