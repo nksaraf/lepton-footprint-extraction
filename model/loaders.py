@@ -181,9 +181,9 @@ class ImageLoader(AbstractImageLoader):
         super(ImageLoader, self).__init__(name,
                                           loader_params,
                                           dataset_params,
-                                          image_transform=normalize_resize(dataset_params.h, dataset_params.w, MEAN,
+                                          image_transform=normalize_resize(dataset_params['h'], dataset_params['w'], MEAN,
                                                                            STD),
-                                          mask_transform=normalize_resize(dataset_params.h, dataset_params.w),
+                                          mask_transform=normalize_resize(dataset_params['h'], dataset_params['w']),
                                           image_augment_with_target_train=Augmenter(fast_seq),
                                           image_augment_train=Augmenter(image_seq))
 
@@ -193,6 +193,6 @@ class ImageLoaderTest(AbstractImageLoader):
         super(ImageLoaderTest, self).__init__(name,
                                               loader_params,
                                               dataset_params,
-                                              image_transform=normalize_resize(dataset_params.h, dataset_params.w, MEAN,
+                                              image_transform=normalize_resize(dataset_params['h'], dataset_params['w'], MEAN,
                                                                                STD),
-                                              mask_transform=normalize_resize(dataset_params.h, dataset_params.w))
+                                              mask_transform=normalize_resize(dataset_params['h'], dataset_params['w']))

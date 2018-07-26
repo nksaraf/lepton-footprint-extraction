@@ -117,8 +117,7 @@ REQUIRED_PACKAGES = [
     'joblib',
     'attrdict',
     'imgaug',
-    'requests>=2.18.0',
-    'opencv-python'
+    'requests>=2.18.0'
 ]
 
 setuptools.setup(

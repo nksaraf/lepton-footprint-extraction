@@ -26,20 +26,22 @@ def predict_local(config):
 
     loader = ((plug + xy_test) | ImageLoaderTest('image_loader', **config.loader)).datagen[0]
 
-    unet = predictors[config.model_name](**config.model)
-    predictor = Predictor('unet_predictor', unet, 'predict')
-    if len(config.model_path) > 0:
-        predictor.setup(model_path=config.model_path)
-    else:
-        raise Exception("No model path provided")
+    # loader = ((plug + xy_test) | ImageLoaderTest('image_loader', **config.loader)).datagen[0]
 
-    x, y = loader.next()
+    # unet = predictors[config.model_name](**config.model)
+    # predictor = Predictor('unet_predictor', unet, 'predict')
+    # if len(config.model_path) > 0:
+    #     predictor.setup(model_path=config.model_path)
+    # else:
+    #     raise Exception("No model path provided")
+    #
+    # x, y = loader.next()
+    #
+    # batch = Wire(x=x, y=y)
+    #
+    # (batch + (batch | predictor))(images='x', masks='y', predictions='output') | ThreeByThreeViewer('viewer')
 
-    batch = Wire(x=x, y=y)
-
-    (batch + (batch | predictor))(images='x', masks='y', predictions='output') | ThreeByThreeViewer('viewer')
-
-    return loader, unet
+    return loader
     # trained_model = loader | trainers[config.base.py.name](**config.base.py).setup()
 
 

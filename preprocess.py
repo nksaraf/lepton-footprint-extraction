@@ -3,32 +3,32 @@ from __future__ import print_function
 import argparse
 import os
 
-from preprocessing import crowdai, csv_utils
+from preprocessing import csv_utils
 
 PROJECT_ID = 'lepton-maps-207611'
 GS_BUCKET = 'gs://lepton'
 
 
-def crowdai_preprocess(args):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--cloud', action='store_true')
-    pargs, rem_args = parser.parse_known_args(args)
-    if pargs.cloud:
-        pipeline_args = ('--project {project} '
-                         '--runner DataFlowRunner '
-                         '--staging_location {bucket}/staging '
-                         '--temp_location {bucket}/temp '
-                         '--working {bucket}/data/mapping_challenge '
-                         '--setup_file ./setup.py ').format(project=PROJECT_ID, bucket='gs://lepton').split()
-    else:
-        pipeline_args = ('--project {project} '
-                         '--runner DirectRunner '
-                         '--staging_location {bucket}/staging '
-                         '--temp_location {bucket}/temp '
-                         '--working {bucket}/data/mapping_challenge ').format(project=PROJECT_ID, bucket='.').split()
-    print()
-    print("crowdai_preprocess " + ' '.join(pipeline_args))
-    crowdai.run(pipeline_args)
+# def crowdai_preprocess(args):
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('-c', '--cloud', action='store_true')
+#     pargs, rem_args = parser.parse_known_args(args)
+#     if pargs.cloud:
+#         pipeline_args = ('--project {project} '
+#                          '--runner DataFlowRunner '
+#                          '--staging_location {bucket}/staging '
+#                          '--temp_location {bucket}/temp '
+#                          '--working {bucket}/data/mapping_challenge '
+#                          '--setup_file ./setup.py ').format(project=PROJECT_ID, bucket='gs://lepton').split()
+#     else:
+#         pipeline_args = ('--project {project} '
+#                          '--runner DirectRunner '
+#                          '--staging_location {bucket}/staging '
+#                          '--temp_location {bucket}/temp '
+#                          '--working {bucket}/data/mapping_challenge ').format(project=PROJECT_ID, bucket='.').split()
+#     print()
+#     print("crowdai_preprocess " + ' '.join(pipeline_args))
+#     crowdai.run(pipeline_args)
 
 
 def data_split(args):
@@ -66,7 +66,7 @@ def localize(args):
 
 
 PROCESSES = {
-    'crowdai': crowdai_preprocess,
+    # 'crowdai': crowdai_preprocess,
     'split': data_split,
     'localize': localize,
 }
