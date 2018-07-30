@@ -25,7 +25,7 @@ class XYTrainer(Trainer):
                                         verbose=1,
                                         **self.trainer.training_config)
         self.log("Trained model")
-        return {"model": self}
+        return {"model": self.trainer}
 
 
 class GeneratorTrainer(Trainer):
@@ -47,4 +47,4 @@ class GeneratorTrainer(Trainer):
                                                   verbose=1,
                                                   **self.trainer.training_config)
         self.log("Trained model")
-        return {"model": self}
+        return {"model": self.trainer}

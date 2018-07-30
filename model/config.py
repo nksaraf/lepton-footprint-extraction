@@ -180,13 +180,11 @@ def create_config(job_dir,
                   batch_size_train,
                   batch_size_val,
                   epochs,
-                  dev_mode,
                   gpus,
                   model,
                   model_path,
                   seed):
     return Wire({
-        'dev_mode': dev_mode,
         'data_dir': data_dir,
         'model_path': model_path,
         'seed': seed,

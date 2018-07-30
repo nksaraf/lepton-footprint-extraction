@@ -21,6 +21,11 @@ trainers = {
 
 
 def train_local(config):
+    try:
+        os.makedirs(os.path.join(config.job_dir, 'checkpoints'))
+    except:
+        pass
+
     plug = Wire(train_path=os.path.join(config.data_dir, 'train.local.csv'),
                 val_path=os.path.join(config.data_dir, 'val.local.csv'),
                 train_mode=True)
@@ -32,31 +37,17 @@ def train_local(config):
                                                                                   **config.loader)
 
     unet = trainers[config.model_name](**config.model)
-    trainer_model = GeneratorTrainer(config.model.name, unet)
+    trainer_model = GeneratorTrainer(config.model_name, unet)
     if len(config.model_path) > 0:
         trainer_model.setup(model_path=config.model_path)
     else:
         trainer_model.setup()
 
-    return loader, trainer_model
-    # trained_model = loader | trainers[config.base.py.name](**config.base.py).setup()
+    trained_model = loader | trainer_model
 
-
-    # trained_model.base.py.save(config.job_dir, 'trained_model.h5')
-    # logger.info("Training pipeline finished")
-    # return loader, trained_model
-    # unet = UNetTrainer('unet_resnet101', **config.unet)
-    # # if config:
-    # #     unet.setup(model_path=config.model_path)
-    # # else:
-    # unet.setup()
-    # # unet.save(config.model_path)
-    #
-    # trained_model = unet.transform(datagen=loader.datagen,
-    #                                validation_datagen=loader.validation_datagen)
-    #
-    # trained_model.base.py.save(config.job_dir, 'trained_model.h5')
-    # logger.info("Training pipeline finished")
+    trained_model.model.save(config.job_dir, 'trained_model.h5')
+    logger.info("Training pipeline finished")
+    return loader, trained_model
 
 
 def train(config):
@@ -94,9 +85,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size-val', default=32, type=int, help='Batch size for validation')
     parser.add_argument('--epochs', required=True, type=int, help='Number of epochs for training')
     parser.add_argument('--gpus', default=1, type=int, help='Number of gpus for training')
-    parser.add_argument('--base.py', default='unet', type=str, help='Model to train (unet/unet_resnet)')
-    parser.add_argument('--base.py-path', default='', type=str, help="Model path")
-    parser.add_argument('-d', '--dev-mode', action='store_true', help='Flag to run in dev mode')
+    parser.add_argument('--model', default='unet', type=str, help='Model to train (unet/unet_resnet)')
+    parser.add_argument('--model-path', default='', type=str, help="Model path")
     parser.add_argument('--seed', '-s', default=6581, type=int, help='Seed')
     parser.add_argument('-l', '--local', action='store_true')
     parse_args, unknown = parser.parse_known_args()

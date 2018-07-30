@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+scipy = "*"
+apache-beam = "*"
+tqdm = "*"
+pandas = "*"
+scikit-learn = "*"
+sklearn = "*"
+imageio = "*"
+joblib = "*"
+attrdict = "*"
+imgaug = "*"
+keras = "*"
+opencv-python = "*"
+matplotlib = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "2.7"
