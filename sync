@@ -1,1 +1,0 @@
-rsync -ave ssh --exclude="*.pyc" --exclude='sync' --exclude="*.DS_Store" --exclude=".idea" ~/Desktop/lepton/ root@leptonai:lepton/ 

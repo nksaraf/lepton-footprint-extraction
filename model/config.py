@@ -3,11 +3,6 @@ import os
 from model.connections import Wire
 from model.loss import dice_coef, jaccard_index
 
-# CONFIG_FILEPATH = 'pipeline.yaml'
-#
-# params = load_params(CONFIG_FILEPATH)
-
-# PARAMS = params
 SIZE_COLUMNS = ['height', 'width']
 SEED = 6581
 X_COLUMN = 'file_path_image'
@@ -18,23 +13,9 @@ STD = [0.229, 0.224, 0.225]
 
 image_h, image_w = (256, 256)
 
-
-# GLOBAL_CONFIG = {
-#     'exp_root': params.working_dir,
-#     'num_workers': params.num_workers,
-#     'num_classes': 2,
-#     'image_shape': (params.image_h, params.image_w),
-#     'batch_size_train': params.batch_size_train,
-#     'batch_size_inference': params.batch_size_inference,
-#     'loader_mode': params.loader_mode,
-#     'stream_mode': params.stream_mode
-# }
-
-
-def unet_resnet_config(job_dir, data_dir, epochs, gpus):
-    return Wire({'unet_resnet': {
+def unet_resnet_config(job_dir, epochs):
+    return Wire({
         'architecture_config': {
-            'gpus': gpus,
             'model_params': {
                 'input_shape': (image_h, image_w),
                 'dropout': 0.1,
@@ -42,9 +23,9 @@ def unet_resnet_config(job_dir, data_dir, epochs, gpus):
                 'out_channels': 1,
                 'l2_reg': 0.0001,
                 'is_deconv': True,
-                'resnet_pretrained': False,
+                'resnet_pretrained': True,
                 'num_filters': 32,
-                'resnet_weights_path': os.path.join(data_dir, 'resnet101_weights.h5')
+                'resnet_weights_path': 'data/resnet101_weights.h5'
             },
             'optimizer_params': {
                 'lr': 0.001,
@@ -78,8 +59,9 @@ def unet_resnet_config(job_dir, data_dir, epochs, gpus):
                 'filepath': os.path.join('checkpoints',
                                          'checkpoint.{epoch:02d}-{val_loss:.2f}.h5'),
                 'period': 1,
-                'save_best_only': False,
+                'save_best_only': True,
                 'verbose': 1,
+                'save_weights_only': True
             },
             'plateau_lr_scheduler': {
                 'factor': 0.3,
@@ -95,13 +77,11 @@ def unet_resnet_config(job_dir, data_dir, epochs, gpus):
                 'log_dir': os.path.join(job_dir, 'logs')
             }
         },
-    }})
+    })
 
-
-def base_unet_config(job_dir, data_dir, epochs, gpus):
+def base_unet_config(job_dir, epochs):
     return Wire({
         'architecture_config': {
-            'gpus': gpus,
             'model_params': {
                 'input_shape': (image_h, image_w),
                 'dropout': 0.1,
@@ -147,6 +127,7 @@ def base_unet_config(job_dir, data_dir, epochs, gpus):
                 'period': 1,
                 'save_best_only': True,
                 'verbose': 1,
+                'save_weights_only': True
             },
             'plateau_lr_scheduler': {
                 'factor': 0.3,
@@ -164,29 +145,21 @@ def base_unet_config(job_dir, data_dir, epochs, gpus):
         },
     })
 
-
 model_configs = {
     'unet_resnet': unet_resnet_config,
     'unet': base_unet_config
 }
 
-
-def model_config(model, job_dir, data_dir, epochs, gpus):
-    return model_configs[model](job_dir, data_dir, epochs, gpus)
-
+def model_config(model, job_dir, epochs):
+    return model_configs[model](job_dir, epochs)
 
 def create_config(job_dir,
-                  data_dir,
                   batch_size_train,
                   batch_size_val,
                   epochs,
-                  gpus,
                   model,
-                  model_path,
                   seed):
     return Wire({
-        'data_dir': data_dir,
-        'model_path': model_path,
         'seed': seed,
         'job_dir': job_dir,
         'xy_splitter': {
@@ -213,13 +186,13 @@ def create_config(job_dir,
                 },
                 'inference': {
                     'batch_size': batch_size_val,
-                    'shuffle': False,
+                    'shuffle': True,
                     'seed': seed
                 },
             },
         },
         'model_name': model,
-        'model': model_config(model, job_dir, data_dir, epochs, gpus)
+        'model': model_config(model, job_dir, epochs)
     })
 
 # 'postprocessor': {

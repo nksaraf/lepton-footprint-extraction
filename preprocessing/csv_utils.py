@@ -29,6 +29,12 @@ def train_val_test_split(file_names, seed, train_filepath, val_filepath, test_fi
     save_to_csv(val_filepath, val, index=False, columns=columns)
     save_to_csv(test_filepath, test, index=False, columns=columns)
 
+def train_val_split(file_names, seed, train_filepath, val_filepath):
+    columns = ("image_id", "file_path_image", "file_path_mask")
+    frame = combine_csvs(columns, file_names)
+    train, val = train_test_split(frame, test_size=0.15, random_state=seed)
+    save_to_csv(train_filepath, train, index=False, columns=columns)
+    save_to_csv(val_filepath, val, index=False, columns=columns)
 
 def create_local_version(filename):
     columns = ("image_id", "file_path_image", "file_path_mask")
@@ -37,3 +43,10 @@ def create_local_version(filename):
     table['file_path_mask'] = table['file_path_mask'].map(lambda a: a[12:])
     table.to_csv('{}.local.csv'.format(os.path.splitext(filename)[0]), index=False, columns=columns)
 
+
+def datafy(filename):
+    columns = ("image_id", "file_path_image", "file_path_mask")
+    table = pd.read_csv(filename, header=0, names=columns, na_filter=False)
+    table['file_path_image'] = table['file_path_image'].map(lambda a: a if a.startswith('data') else os.path.join('data', a))
+    table['file_path_mask'] = table['file_path_mask'].map(lambda a: a if a.startswith('data') else os.path.join('data', a))
+    table.to_csv(filename, index=False, columns=columns)

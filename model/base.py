@@ -27,13 +27,17 @@ class Model(object):
         self.callbacks = None
         self.custom_objects = None
 
-    def setup(self, model_path=None):
-        if model_path is not None:
-            self.model = load_model(model_path, custom_objects=self.custom_objects)
+    def setup(self, path=None, load_weights=False, gpus=1):
+        if path is not None:
+            if load_weights:
+                self.model = self.compile_model(gpus=gpus, **self.architecture_config)
+                self.training_model.load_weights(path)
+            else:
+                self.model = load_model(path, custom_objects=self.custom_objects)
         else:
-            self.model = self.compile_model(**self.architecture_config)
+            self.model = self.compile_model(gpus=gpus, **self.architecture_config)
 
-    def compile_model(self, model_params, optimizer_params, compiler_params, loss_params, gpus):
+    def compile_model(self, gpus, model_params, optimizer_params, compiler_params, loss_params):
         optimizer = self.build_optimizer(**optimizer_params)
         loss = self.build_loss(**loss_params)
         if gpus <= 1:

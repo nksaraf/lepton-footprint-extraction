@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""ResNet-101 base.py for Keras.
+"""ResNet-101 model for Keras.
 
 # Reference:
 
@@ -229,8 +229,8 @@ def ResNet101(include_top=True,
     image_data_format='channels_last'` in your Keras config at
     ~/.keras/keras.json.
 
-    The base.py and the weights are compatible with both TensorFlow and Theano.
-    The data format convention used by the base.py is the one specified in your
+    The model and the weights are compatible with both TensorFlow and Theano.
+    The data format convention used by the model is the one specified in your
     Keras config file.
 
     Parameters
@@ -240,7 +240,7 @@ def ResNet101(include_top=True,
         weights: one of `None` (random initialization) or 'imagenet'
             (pre-training on ImageNet).
         input_tensor: optional Keras tensor (i.e. output of `layers.Input()`)
-            to use as image input for the base.py.
+            to use as image input for the model.
         input_shape: optional shape tuple, only to be specified if
             `include_top` is False (otherwise the input shape has to be
             `(224, 224, 3)` (with `channels_last` data format) or
@@ -250,11 +250,11 @@ def ResNet101(include_top=True,
             E.g. `(200, 200, 3)` would be one valid value.
         pooling: Optional pooling mode for feature extraction when
             `include_top` is `False`.
-            - `None` means that the output of the base.py will be the 4D tensor
+            - `None` means that the output of the model will be the 4D tensor
                 output of the last convolutional layer.
             - `avg` means that global average pooling will be applied to the
                 output of the last convolutional layer, and thus the output of
-                the base.py will be a 2D tensor.
+                the model will be a 2D tensor.
             - `max` means that global max pooling will be applied.
         classes: optional number of classes to classify images into, only to be
             specified if `include_top` is True, and if no `weights` argument is
@@ -262,7 +262,7 @@ def ResNet101(include_top=True,
 
     Returns
     -------
-        A Keras base.py instance.
+        A Keras model instance.
 
     Raises
     ------
@@ -328,13 +328,13 @@ def ResNet101(include_top=True,
         elif pooling == 'max':
             x = GlobalMaxPooling2D()(x)
 
-    # Ensure that the base.py takes into account
+    # Ensure that the model takes into account
     # any potential predecessors of `input_tensor`.
     if input_tensor is not None:
         inputs = get_source_inputs(input_tensor)
     else:
         inputs = img_input
-    # Create base.py.
+    # Create model.
     model = Model(inputs, x, name='resnet101')
 
     return model

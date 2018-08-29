@@ -31,25 +31,35 @@ GS_BUCKET = 'gs://lepton'
 #     crowdai.run(pipeline_args)
 
 
+def combine_csvs(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--files', nargs='+')
+    parser.add_argument('--main', required=True)
+    pargs, _ = parser.parse_known_args(args)
+    columns = ("image_id", "file_path_image", "file_path_mask")
+    frame = csv_utils.combine_csvs(columns, pargs.files)
+    csv_utils.save_to_csv(os.path.join('data', pargs.main), frame, columns, index=False)
+    print()
+    print("combine csvs")
+
+
 def data_split(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--files', nargs='+')
     parser.add_argument('--folder', required=True)
-    parser.add_argument('-d', '--dev-mode', action='store_true')
+    # parser.add_argument('-d', '--dev-mode', action='store_true')
     pargs, _ = parser.parse_known_args(args)
-    portion = 0.001 if pargs.dev_mode else 1.0
+    # portion = 0.001 if pargs.dev_mode else 1.0
     try:
         os.makedirs(os.path.join('data', pargs.folder))
     except:
         pass
-    csv_utils.train_val_test_split(pargs.files,
-                                   6581,
+    csv_utils.train_val_split(pargs.files,
+                                   1082,
                                    os.path.join('data', pargs.folder, 'train.csv'),
-                                   os.path.join('data', pargs.folder, 'val.csv'),
-                                   os.path.join('data', pargs.folder, 'test.csv'),
-                                   part=portion)
+                                   os.path.join('data', pargs.folder, 'val.csv'))
     print()
-    print("train-valid-test split")
+    print("train-valid split")
 
 
 def localize(args):
@@ -64,11 +74,23 @@ def localize(args):
         except:
             print('{} failed'.format(filename))
 
+def datafy(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--files', nargs='+')
+    pargs, _ = parser.parse_known_args(args)
+    print()
+    print("datafying...")
+    for filename in pargs.files:
+        csv_utils.datafy(filename)
+
+
 
 PROCESSES = {
     # 'crowdai': crowdai_preprocess,
     'split': data_split,
     'localize': localize,
+    'combine': combine_csvs,
+    'datafy': datafy
 }
 
 if __name__ == '__main__':

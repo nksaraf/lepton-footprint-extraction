@@ -11,8 +11,8 @@ import numpy as np
 from imgaug import augmenters as iaa
 
 fast_seq = iaa.SomeOf((2, 4),
-                      [iaa.Fliplr(0.5),
-                       iaa.Flipud(0.5),
+                      [iaa.Fliplr(0.75),
+                       iaa.Flipud(0.75),
                        iaa.OneOf([iaa.Affine(rotate=0), iaa.Affine(rotate=90),
                                   iaa.Affine(rotate=180), iaa.Affine(rotate=270)]),
                        ], random_order=True)

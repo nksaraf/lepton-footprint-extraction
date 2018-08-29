@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from keras.layers import BatchNormalization, Concatenate, Conv2D, Conv2DTranspose, Dropout, MaxPooling2D, UpSampling2D, \
     add
 from keras.models import Input, Model
@@ -6,7 +8,7 @@ from keras.regularizers import l2
 from model.connections import get_logger
 from resnet101 import ResNet101
 
-logger = get_logger()
+logger = print
 
 
 class BaseUNet(object):
@@ -53,15 +55,15 @@ class UNetResNet101(object):
                     is_deconv=False, resnet_pretrained=True, l2_reg=0.0001,
                     resnet_weights_path='data/resnet101_weights.h5'):
 
-        logger.info('Loading ResNet101 encoder...')
+        logger('Loading ResNet101 encoder...')
         input_shape = input_shape + (in_channels,)
         self.encoder = ResNet101(include_top=False, input_shape=(256, 256, 3), classes=out_channels)
-        logger.info('Loaded ResNet101 encoder')
+        logger('Loaded ResNet101 encoder')
 
         if resnet_pretrained:
-            logger.info('Loading ResNet101 image-net weights...')
+            logger('Loading ResNet101 image-net weights...')
             self.encoder.load_weights(resnet_weights_path)
-            logger.info('Loaded ResNet101 imagenet weights')
+            logger('Loaded ResNet101 imagenet weights')
 
         input_tensor = Input(input_shape)
         stage_1_layers = ['conv1_zeropadding', 'conv1', 'bn_conv1', 'scale_conv1', 'conv1_relu']

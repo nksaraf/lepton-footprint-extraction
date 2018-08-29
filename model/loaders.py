@@ -176,9 +176,9 @@ def normalize_resize(h, w, mean=0., std=1.):
                                transforms.Normalize(mean=mean, std=std)])
 
 
-class ImageLoader(AbstractImageLoader):
+class ImageLoaderNormalized(AbstractImageLoader):
     def __init__(self, name, loader_params, dataset_params):
-        super(ImageLoader, self).__init__(name,
+        super(ImageLoaderNormalized, self).__init__(name,
                                           loader_params,
                                           dataset_params,
                                           image_transform=normalize_resize(dataset_params['h'], dataset_params['w'], MEAN,
@@ -188,11 +188,29 @@ class ImageLoader(AbstractImageLoader):
                                           image_augment_train=Augmenter(image_seq))
 
 
-class ImageLoaderTest(AbstractImageLoader):
+class ImageLoaderBasic(AbstractImageLoader):
     def __init__(self, name, loader_params, dataset_params):
-        super(ImageLoaderTest, self).__init__(name,
+        super(ImageLoaderBasic, self).__init__(name,
+                                          loader_params,
+                                          dataset_params,
+                                          image_transform=transforms.Resize((dataset_params['h'], dataset_params['w'])),
+                                          mask_transform=normalize_resize(dataset_params['h'], dataset_params['w']),
+                                          image_augment_with_target_train=Augmenter(fast_seq),
+                                          image_augment_train=Augmenter(image_seq))
+
+class ImageLoaderNormalizedTest(AbstractImageLoader):
+    def __init__(self, name, loader_params, dataset_params):
+        super(ImageLoaderNormalizedTest, self).__init__(name,
                                               loader_params,
                                               dataset_params,
                                               image_transform=normalize_resize(dataset_params['h'], dataset_params['w'], MEAN,
                                                                                STD),
+                                              mask_transform=normalize_resize(dataset_params['h'], dataset_params['w']))
+
+class ImageLoaderBasicTest(AbstractImageLoader):
+    def __init__(self, name, loader_params, dataset_params):
+        super(ImageLoaderBasicTest, self).__init__(name,
+                                              loader_params,
+                                              dataset_params,
+                                              image_transform=transforms.Resize((dataset_params['h'], dataset_params['w'])),
                                               mask_transform=normalize_resize(dataset_params['h'], dataset_params['w']))

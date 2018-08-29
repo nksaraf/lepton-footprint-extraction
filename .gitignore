@@ -1,5 +1,11 @@
 data
 working
+models
 lepton.*
 *.pyc
 .DS_Store
+jobs
+*.sh
+sync
+*.yaml
+.idea

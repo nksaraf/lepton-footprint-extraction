@@ -17,7 +17,12 @@ attrdict = "*"
 imgaug = "*"
 keras = "*"
 opencv-python = "*"
-matplotlib = "*"
+tensorflow="*"
+rasterio = "*"
+descartes = "*"
+fiona = "*"
+shapely = "*"
+ipykernel = "*"
 
 [dev-packages]
 

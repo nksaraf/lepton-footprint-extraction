@@ -1,3 +1,4 @@
+from __future__ import print_function
 import inspect
 import logging
 import sys
@@ -5,8 +6,6 @@ import types
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from attrdict import AttrDict
-
-LOGGER = 'log'
 
 
 class Wire(AttrDict):
@@ -50,14 +49,10 @@ class Transformer(object):
     def __init__(self, name='transformer', logger=None, need_setup=False):
         self.name = name.upper()
         if logger is None:
-            self.logger = get_logger()
+            self.logger = print
         else:
             self.logger = logger
         self.is_setup = not need_setup
-
-    @abstractproperty
-    def __out__(self):
-        return tuple()
 
     @property
     def inputs(self):
@@ -67,16 +62,9 @@ class Transformer(object):
     def outputs(self):
         return self.__class__.__out__
 
-    def __setup__(self, **kwargs):
-        pass
-
-    @abstractmethod
-    def __transform__(self, **kwargs):
-        raise NotImplementedError
-
     def setup(self, **kwargs):
         self.is_setup = True
-        self.logger.info('Setting up {}'.format(self.__str__()))
+        self.logger('Setting up {}'.format(self.__str__()))
         self.__setup__(**kwargs)
         return self
 
@@ -84,18 +72,22 @@ class Transformer(object):
         if not self.is_setup:
             raise TransformerNotSetupError
         else:
-            self.logger.info('Connecting {}'.format(self.__str__()))
+            self.logger('Connecting {}'.format(self.__str__()))
             return self.__transform__(**kwargs)
 
     def connect(self, wire):
         _connect(self, wire)
 
-    def __call__(self, wire):
-        return _connect(self, wire)
-
     def log(self, msg):
         pre = (' ' * len('Connecting ')) + ('{}: '.format(self.name))
-        self.logger.info(pre + msg)
+        self.logger(pre + msg)
+
+    @abstractproperty
+    def __out__(self):
+        return tuple()
+
+    def __call__(self, wire):
+        return _connect(self, wire)
 
     def __repr__(self):
         return "{}: ({}) ==> {}{} ==> ({})".format(
@@ -107,6 +99,58 @@ class Transformer(object):
 
     def __str__(self):
         return self.__repr__()
+
+    def __add__(self, other):
+        if isinstance(other, Transformer):
+            return MegaTransformer(self, other, self.name + '+' + other.name)
+
+    def __setup__(self, **kwargs):
+        pass
+
+    @abstractmethod
+    def __transform__(self, **kwargs):
+        raise NotImplementedError
+
+
+class StreamTransformer(Transformer):
+    __metaclass__ = ABCMeta
+
+    def stream(self, wire):
+        pass
+        # TODO: what to do
+
+
+class MegaTransformer(Transformer):
+    __out__ = ('outputs', )
+
+    def __init__(self, left, right, name):
+        super(MegaTransformer, self).__init__(name, left.logger)
+        self.left = left
+        self.right = right
+
+    @property
+    def inputs(self):
+        return self.left.inputs
+
+    def __transform__(self, **kwargs):
+        output = self.left.transform(**kwargs)
+        output.update(self.right.transform(**kwargs))
+        return output
+
+
+class LambdaTransformer(Transformer):
+    __out__ = ('output', )
+
+    def __init__(self, func, name):
+        super(LambdaTransformer, self).__init__(name=name)
+        self.func = func
+
+    @property
+    def inputs(self):
+        return inspect.getargspec(self.func)[0]
+
+    def __transform__(self, **kwargs):
+        return { self.name.lower() + '_output': self.func(**kwargs) }
 
 
 def _connect(transformer, wire):
@@ -138,6 +182,9 @@ class TransformerNotSetupError(BaseException):
     pass
 
 
+LOGGER = 'log'
+
+
 def init_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
@@ -156,31 +203,3 @@ def get_logger():
 
 
 init_logger(LOGGER)
-
-
-# class Adapter(object):
-#     def __init__(self, *args, **kwargs):
-#         self.adapter = dict(*args, **kwargs)
-#         check = [type(k) == str and type(v) == str for k, v in self.adapter.iteritems()]
-#         if not all(check):
-#             raise InvalidAdapterError
-#
-#     def __adapt__(self, wire):
-#         output = Wire()
-#         for key, value in self.adapter.iteritems():
-#             if value in wire:
-#                 output[key] = wire[value]
-#             else:
-#                 raise MissingWireError
-#
-#         for key in wire.keys():
-#             if key not in self.adapter.itervalues():
-#                 output[key] = wire[key]
-#         return output
-#
-#     def __repr__(self):
-#         contents = ', '.join(['{}: {}'.format(k, v) for k, v in self.adapter.iteritems()])
-#         return 'Adapter({contents})'.format(contents=contents)
-#
-#     def __str__(self):
-#         return self.__repr__()

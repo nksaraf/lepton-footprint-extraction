@@ -1,0 +1,4 @@
+hyd_v1 -> old banglore model trained on erratic hyderabad data
+hyd_v2 -> old banglore model trained on correct hyderabad data
+hyd_v3 -> new model trained just on hyderabad data
+mix_v1 -> new model trained on bangalore (fixed) + hyderabad data
