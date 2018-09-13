@@ -154,8 +154,7 @@ def model_config(model, job_dir, epochs):
     return model_configs[model](job_dir, epochs)
 
 def create_config(job_dir,
-                  batch_size_train,
-                  batch_size_val,
+                  batch_size,
                   epochs,
                   model,
                   seed):
@@ -175,62 +174,14 @@ def create_config(job_dir,
         'loader': {
             'dataset_params': {
                 'h': image_h,
-                'w': image_w,
-                'distances': False,
+                'w': image_w
             },
             'loader_params': {
-                'training': {
-                    'batch_size': batch_size_train,
-                    'shuffle': True,
-                    'seed': seed
-                },
-                'inference': {
-                    'batch_size': batch_size_val,
-                    'shuffle': True,
-                    'seed': seed
-                },
+                'batch_size': batch_size,
+                'shuffle': False,
+                'seed': seed
             },
         },
         'model_name': model,
         'model': model_config(model, job_dir, epochs)
     })
-
-# 'postprocessor': {
-#     'mask_dilation': {
-#         'dilate_selem_size': params.dilate_selem_size
-#     },
-#     'mask_erosion': {
-#         'erode_selem_size': params.erode_selem_size
-#     },
-#     'prediction_crop': {
-#         'h_crop': params.crop_image_h,
-#         'w_crop': params.crop_image_w
-#     },
-#     'scoring_model': params.scoring_model,
-#     'lightGBM': {
-#         'model_params': {
-#             'learning_rate': params.lgbm__learning_rate,
-#             'boosting_type': 'gbdt',
-#             'objective': 'regression',
-#             'metric': 'regression_l2',
-#             'sub_feature': 1.0,
-#             'num_leaves': params.lgbm__num_leaves,
-#             'min_data': params.lgbm__min_data,
-#             'max_depth': params.lgbm__max_depth
-#         },
-#         'training_params': {
-#             'number_boosting_rounds': params.lgbm__number_of_trees,
-#             'early_stopping_rounds': params.lgbm__early_stopping
-#         },
-#         'train_size': params.lgbm__train_size,
-#         'target': params.lgbm__target
-#     },
-#     'random_forest': {
-#         'train_size': params.lgbm__train_size,
-#         'target': params.lgbm__target
-#     },
-#     'nms': {
-#         'iou_threshold': params.nms__iou_threshold,
-#         'num_threads': params.num_threads
-#     },
-# }

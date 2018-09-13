@@ -1,0 +1,1 @@
+rm -rf jobs/lepton_$1

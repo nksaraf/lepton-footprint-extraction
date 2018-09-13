@@ -16,7 +16,7 @@ class Predictor(Transformer):
         if x is Iterator:
             z = self.predictor.model.predict_generator(x)
         elif batch_size is not None:
-            z = self.predictor.model.predict(x, batch_size)
+            z = self.predictor.model.predict(x, batch_size, verbose=1)
         else:
             z = self.predictor.model.predict_on_batch(x)
         return {'predictions': z}

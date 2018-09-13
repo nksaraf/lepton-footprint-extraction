@@ -12,7 +12,7 @@ from model.connections import Wire
 from model.base import UNetModel, ResnetUNetModel
 from model.trainer import GeneratorTrainer
 from model.config import create_config
-from model.loaders import ImageLoaderNormalized, ImageLoaderBasic
+from model.loaders import ImageLoaderAugmented, ImageLoaderInference, ImageLoaderNormalizedAugmented
 from model.utils import CSVLoader
 
 trainers = {
@@ -21,8 +21,8 @@ trainers = {
 }
 
 loaders = {
-    'basic': ImageLoaderBasic,
-    'normalized': ImageLoaderNormalized
+    'basic': ImageLoaderAugmented,
+    'normalized': ImageLoaderNormalizedAugmented
 }
 
 
@@ -36,10 +36,15 @@ def train(config, args):
                 val_path=os.path.join(args.data_dir, 'val.csv'),
                 train_mode=True)
 
-    xy_train = plug(filename='train_path') | CSVLoader(name='xy_train', **config.xy_splitter)
-    xy_valid = plug(filename='val_path') | CSVLoader(name='xy_valid', **config.xy_splitter)
+    train_loader = (plug(filename='train_path') 
+        | CSVLoader(name='xy_train', **config.xy_splitter)
+        | ImageLoaderAugmented('train_loader', True, **config.loader))
 
-    loader = (plug + xy_train + xy_valid(x_valid='x', y_valid='y')) | loaders[args.loader]('image_loader', **config.loader)
+    val_loader = (plug(filename='val_path') 
+        | CSVLoader(name='xy_valid', **config.xy_splitter)
+        | ImageLoaderInference('val_loader', True, **config.loader))
+
+    loader = train_loader(datagen='generator') + val_loader(validation_datagen='generator')
 
     unet = trainers[config.model_name](**config.model)
     trainer_model = GeneratorTrainer(config.model_name, unet)
@@ -49,7 +54,6 @@ def train(config, args):
         trainer_model.setup(gpus=args.gpus)
 
     trained_model = loader | trainer_model
-
     trained_model.model.save(config.job_dir, 'trained_model.h5')
     return loader, trained_model
 
@@ -57,8 +61,7 @@ def train(config, args):
 if __name__ == '__main__':
     config_parser = argparse.ArgumentParser()
     config_parser.add_argument('--job-dir', required=True, type=str, help='Working folder')
-    config_parser.add_argument('--batch-size-train', default=32, type=int, help='Batch size for training')
-    config_parser.add_argument('--batch-size-val', default=32, type=int, help='Batch size for validation')
+    config_parser.add_argument('--batch-size', default=32, type=int, help='Batch size for training')
     config_parser.add_argument('--epochs', required=True, type=int, help='Number of epochs for training')
     config_parser.add_argument('--model', default='unet', type=str, help='Model to train (unet/unet_resnet)')
     config_parser.add_argument('--seed', '-s', default=6581, type=int, help='Seed')
@@ -68,6 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpus', default=1, type=int, help='Number of gpus for training')
     parser.add_argument('--model-path', default='', type=str, help="Model path")
     parser.add_argument('--loader', default='basic', type=str, help="Image data loader to use")
+    parser.add_argument('--data-pre', required=False, type=str, default='', help="Data files prefix")
     
     config_args, unknown = config_parser.parse_known_args()
     config = create_config(**config_args.__dict__)

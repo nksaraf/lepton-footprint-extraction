@@ -230,22 +230,47 @@ class Iterator(Sequence):
 class CSVLoader(Transformer):
     __out__ = ('x', 'y')
 
-    def __init__(self, name, x_column, y_column):
+    def __init__(self, name, x_column, y_column, prefix=''):
         super(CSVLoader, self).__init__(name)
         self.x_column = x_column
         self.y_column = y_column
+        self.prefix = prefix
 
     def __transform__(self, filename, train_mode):
         self.log("Loading data from {filename}".format(filename=filename))
-        with file_io.FileIO(filename, 'r') as fp:
+        with open(filename, 'r') as fp:
             data = pd.read_csv(fp)
-        x = data[self.x_column].values
+        x = data[self.x_column].map(lambda a: os.path.join(self.prefix, a))
         if train_mode:
-            y = data[self.y_column].values
+            y = data[self.y_column].map(lambda a: os.path.join(self.prefix, a))
         else:
             y = None
         return {'x': x,
                 'y': y}
+
+class CSVLoaderXYZ(Transformer):
+    __out__ = ('x', 'y', 'z')
+
+    def __init__(self, name, x_column, y_column, prefix=''):
+        super(CSVLoaderXYZ, self).__init__(name)
+        self.x_column = x_column
+        self.y_column = y_column
+        self.prefix = prefix
+
+    def __transform__(self, filename, train_mode):
+        self.log("Loading data from {filename}".format(filename=filename))
+        with open(filename, 'r') as fp:
+            data = pd.read_csv(fp)
+        x = data[self.x_column].map(lambda a: os.path.join(self.prefix, a))
+        if train_mode:
+            y = data[self.y_column].map(lambda a: os.path.join(self.prefix, a))
+        else:
+            y = None
+
+        z = data[self.x_column]
+        return {'x': x,
+                'y': y,
+                'z': z }
 
 
 def save_image(path, x, scale=True):
@@ -268,7 +293,7 @@ def save_image(path, x, scale=True):
         if x.shape[2] == 1:
             x = x.reshape((x.shape[0], x.shape[1]))
 
-    with file_io.FileIO(path, mode='wb') as fp:
+    with open(path, mode='wb') as fp:
         imwrite(fp, x)
 
 
@@ -286,24 +311,17 @@ def load_image(path, color_mode='rgb'):
         ValueError: if image or color_mode is not supported
     """
     assert color_mode in ['rgb', 'gray'], 'Invalid color_mode (should be either rgb or gray), got {}'.format(color_mode)
-    with file_io.FileIO(path, mode='rb') as fp:
+    with open(path, mode='rb') as fp:
         image = imread(fp)
 
     if image is None:
         raise ValueError('Unable to load {}'.format(path))
 
-    # if len(image.shape) == 2:
-    #     image = image.reshape((image.shape[0], image.shape[1], 1))
-
-    # if image.max() > 1.0:
-    #     image = image / 255.
-
-    # image.astype(np.float32)
     return image
 
 
 def load_joblib(filepath):
-    with file_io.FileIO(filepath, 'r') as fp:
+    with open(filepath, 'r') as fp:
         return joblib.load(fp)
 
 
@@ -315,7 +333,7 @@ def set_seed(seed):
 def save_to_csv(file_path, data, columns, **kwargs):
     df = pd.DataFrame(data=data, columns=columns)
     df = df.dropna()
-    with file_io.FileIO(file_path, 'w') as fp:
+    with open(file_path, 'w') as fp:
         df.to_csv(fp, **kwargs)
 
 

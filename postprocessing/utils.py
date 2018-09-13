@@ -39,7 +39,10 @@ def plt_polygons(plot, polygons, image, color='red', title=None):
     if title is not None:
         plt.title(title)
     plt.imshow(image.astype(np.uint8))
-    ax.add_patch(PolygonPatch(polygons, edgecolor=color, facecolor='none', linewidth=1))
+    try:
+        ax.add_patch(PolygonPatch(polygons, edgecolor=color, facecolor='none', linewidth=1))
+    except:
+        pass
     plt.tick_params(**no_labels)
 
 
@@ -102,21 +105,6 @@ class ThreeByThreeViewer(Transformer):
         plt.show()
         return {'status': True}
 
-
-# class PolygonViewer(Viewer):
-#     def __transform__(self, images, truths, predictions):
-#         plt.figure(figsize=(10, 8))
-#         for i in range(3):
-#             plt_image((3, 3, ((i * 3) + 1)), images[i])
-#             plt_mask((3, 3, ((i * 3) + 2)), truths[i])
-#             plt_polygons((3, 3, ((i * 3) + 3)), predictions[i], images[i])
-#         plt.tight_layout()
-#         if self.save:
-#             path = os.path.join(self.dir, 'prediction_{}.png'.format(random.randint(1000, 9999)))
-#             self.log('Saving to {}'.format(path))
-#             plt.savefig(path)
-#         plt.show()
-#         return {'status': True}
 
 class PolygonViewer(ThreeByThreeViewer):
     def __transform__(self, images, truths, predictions, evaluation):
