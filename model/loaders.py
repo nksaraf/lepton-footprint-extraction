@@ -22,7 +22,10 @@ ImageModifier.__new__.__defaults__ = (None, None, None, None)
 
 
 class BatchGenerator(Iterator):
-
+	"""Produces random batches of data endlessly (shuffling) from the given data streams, the
+	batches are determined and loaded when required. The data can have upto three variables in them
+	and they will be synchronized in the batches that are produced.
+	"""
     def __init__(self, x, y=None, z=None, iter_params=def_iter_params):
         Iterator.__init__(self,
                           len(x),
@@ -79,7 +82,11 @@ class BatchGenerator(Iterator):
 
 
 class ImageGenerator(BatchGenerator):
-
+	""" Generator of batches of image data (x and y) along with metadata for each 
+	entry in the batch (z). The x and y data streams are expected to be numpy arrays
+	containing the images, which z could be a list of the same length as x and y but contain
+	arbitrary data.
+	"""
     def __init__(self, x,
                  y=None,
                  z=None,
@@ -111,6 +118,9 @@ class ImageGenerator(BatchGenerator):
 
 
 class ImageFromPathGenerator(ImageGenerator):
+    """An image batch generator that consumes filepaths and loads the images for every batch 
+    from the filenames when required. It loads both the ``x`` and the ``y`` values from file,
+    while ``z`` is taken from the data it was provided."""
 
     def _load(self, index):
         x = load_image(self.x[index], color_mode='rgb')
@@ -121,6 +131,21 @@ class ImageFromPathGenerator(ImageGenerator):
 
 
 class ImageLoader(Transformer):
+	""" A transformer that takes in x, y, z data points and produces a generator (Iterator)
+	that lets a consumer use data in batches (produced randomly)
+
+	Input:
+		x, y, z: data
+
+	Output:
+		generator: An Iterator that produces data in batches
+
+	Args:
+		path_mode: if true, then x, y data is loaded from the filepaths that are given, else
+					the x, y data given is used
+		loader_params: dict containing parameters for the loader (batch_size, shuffle, seed)
+		modifier: ``ImageModifier`` instance (transform/augmentation functions for the data)
+	"""
     __out__ = ('generator', )
 
     def __init__(self, name, path_mode, loader_params, modifier):
@@ -140,6 +165,8 @@ def normalize_resize(h, w, mean=0., std=1.):
     return transforms.Compose([transforms.Resize((h, w)),
                                transforms.Normalize(mean=mean, std=std)])
 
+
+# Different versions of ImageLoader that differ in terms of the modifiers given to them
 
 class ImageLoaderNormalizedAugmented(ImageLoader):
 

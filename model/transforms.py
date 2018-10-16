@@ -10,6 +10,10 @@ import cv2
 import numpy as np
 from imgaug import augmenters as iaa
 
+""" Utility classes and functions to apply common transformations to images in bulk.
+Also includes support for augmentation during training process."""
+
+
 fast_seq = iaa.SomeOf((2, 4),
                       [iaa.Fliplr(0.75),
                        iaa.Flipud(0.75),

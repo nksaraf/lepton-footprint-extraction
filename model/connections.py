@@ -7,6 +7,36 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from attrdict import AttrDict
 
+"""A tiny pipeline library written by me to help in the prototyping phase as well as 
+writing intuitive code that matches the context of a "automation pipeline". Can be used
+for any kind of project where there are sequences of tasks to be done.
+
+The analogy is made to a circuit:
+	Wire: Represents data flowing between components. The data is represented as a dictionary
+		to be used as keyword arguments to functions easily. They are also backed by an AttrDict,
+		which allows the dictionary entries to be accessed as attributes (asthetically better).
+		Created and used just like a normal dictionary.
+
+	Transformer: Wires are connected to transformers that do some operation on them and return
+		another wire as output. The transformer expects certain input, and the wire is resolved to
+		match those inputs before connection. This happens internally.
+
+	Though the Transfomer class will help write modular code and will be required if the transformers
+	require certain setup to be done and hold attributes themselves before the transforming, they can
+	be replaced by reqular functions or even lambda functions. 
+
+	Some syntactic sugar is also introduced here and will become clearer as you read the code:
+		(Wire -> x, y | Transformer -> A, B)
+		x + y => merged wires
+		x(blah=blah ...) => adapting (explained below)
+		x | A => connecting x to A
+		x | A | B => connecting x to A, the output of this is connected to B
+		x > A => connecting x to A
+		A(x) => connecting x to A
+		(x + y) | A => merged (x,y) connected to A
+		x | (A + B) => connecting x to MegaTransfomer A, B
+
+"""
 
 class Wire(AttrDict):
     def __repr__(self):
@@ -20,6 +50,16 @@ class Wire(AttrDict):
         return self.__adapt__(*args, **kwargs)
 
     def __adapt__(self, *args, **kwargs):
+    	"""Changes the naming of the items in the wire, by a given specification.
+    	Used to match the wire to the appropriate inputs required by a Transformer.
+		Arguments provided are used to form a dictionary which is used as follows: 
+			for every key, value pair in the adapter dictionary:
+				if value is an item in the wire, 
+					adapted_wire[key] = this[value]
+				if the value is not in the wire, then an exception is raised
+			all the other keys in the wire are copied to the adapted wire
+		"""
+
         output = Wire()
         adapter = dict(*args, **kwargs)
         for key, value in adapter.iteritems():
@@ -44,6 +84,10 @@ class Wire(AttrDict):
 
 
 class Transformer(object):
+	"""Abstract class. Implementing classes need to override __transform__, and 
+	__setup__ if necessary. If need_setup=True, the setup function must be classed before
+	transform, otherwise there will be an error.
+	"""
     __metaclass__ = ABCMeta
 
     def __init__(self, name='transformer', logger=None, need_setup=False):
@@ -56,6 +100,7 @@ class Transformer(object):
 
     @property
     def inputs(self):
+    	"""List of argument names for __transform__ (except self)"""
         return inspect.getargspec(self.__transform__)[0][1:]
 
     @property
@@ -63,6 +108,7 @@ class Transformer(object):
         return self.__class__.__out__
 
     def setup(self, **kwargs):
+    	"""Must be called if need_setup is True"""
         self.is_setup = True
         self.logger('Setting up {}'.format(self.__str__()))
         self.__setup__(**kwargs)
@@ -154,6 +200,17 @@ class LambdaTransformer(Transformer):
 
 
 def _connect(transformer, wire):
+	"""Connects a wire to a transfomer. Checks for all the input arguments required in the wire,
+	and adapts the wire for the transformer. then connects and returns the transformed 
+	wire.
+
+	Args:
+		transformer: `Transformer` or function or lambda
+		wire: `Wire` or dictionary
+
+	Returns:
+		transformed `Wire`
+	"""
     if isinstance(transformer, Transformer):
         inputs = transformer.inputs
         func = transformer.transform

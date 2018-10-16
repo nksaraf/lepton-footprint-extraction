@@ -8,8 +8,22 @@ from model.connections import Transformer
 
 MIN_POLYGON_AREA = 1.
 
-
 class Polygonizer(Transformer):
+	"""A transformer that extracts polygons from binary pixel masks [0, 1] using 
+	algorithms available in the OpenCV library
+
+	Input:
+		predictions: numpy array with shape: {n,h,w,1}, n -> number of predictions,
+			could also be {h,w,1} if only prediction to transform
+
+	Output:
+		polygons: List of MultiPolygons, (or one if only one prediction). Each MultiPolygon
+				contains all the polygons extracted for a single mask
+
+	Args:
+		epsilon: parameter used for the Douglas Peucker algorithm to simplify polygsons
+		min_area: minimum polygon area, all polygons below this will be removed from the output
+	"""
     __out__ = ('polygons', )
     
     def __init__(self, name, epsilon=1.5, min_area=MIN_POLYGON_AREA):
@@ -18,6 +32,10 @@ class Polygonizer(Transformer):
         self.min_area = min_area
 
     def polygonize(self, mask):
+    	"""Create polygons from binary pixel masks and output as a MultiPolygon. Uses
+    	OpenCV's ``findContours`` function to extract polygons and the Douglas Peucker algorithm
+    	to simplify them.
+    	"""
         mask[mask < 0.5] = 0
         mask[mask > 0] = 1
 

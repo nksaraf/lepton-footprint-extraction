@@ -48,6 +48,9 @@ def train(config, args):
 
     unet = trainers[config.model_name](**config.model)
     trainer_model = GeneratorTrainer(config.model_name, unet)
+
+    # if a model path was given, load the weights from that path before training,
+    # allows training on old models
     if len(args.model_path) > 0:
         trainer_model.setup(path=args.model_path, load_weights=True, gpus=args.gpus)
     else:

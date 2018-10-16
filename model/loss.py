@@ -4,16 +4,16 @@ from keras.losses import binary_crossentropy
 
 
 def weighted_cross_entropy(target, output, weights_function=None):
-    """Calculate weighted Cross Entropy loss for multiple classes.
+    """Calculate weighted binary cross Entropy loss for multiple classes.
 
-    This function calculates torch.nn.CrossEntropyLoss(), but each pixel loss is weighted.
-    Target for weights is defined as a part of target, in target[:, 1:, :, :].
-    If weights_function is not None weights are calculated by applying this function on target[:, 1:, :, :].
-    If weights_function is None weights are taken from target[:, 1, :, :].
+    This function calculates binary cross entropy loss, but each pixel loss is weighted.
+    Target for weights is defined as a part of target, in target[:, :, :, 1:].
+    If weights_function is not None weights are calculated by applying this function on target[:, :, :, 1:].
+    If weights_function is None weights are taken from target[:, :, :, 1].
 
     Args:
-        output (torch.Tensor): Model output of shape (N x C x H x W).
-        target (torch.Tensor): Target of shape (N x (1 + K) x H x W). Where K is number of different weights.
+        target: Model output of shape (N x H x W x C).
+        target: Target of shape (N x H x W x (K+1)). Where K is number of different weights.
         weights_function (function, optional): Function applied on target for weights.
 
     Returns:
@@ -62,20 +62,19 @@ def _get_size_weights(sizes, C):
 
 def mixed_iou_cross_entropy_loss(output, target, iou_weight=0.5, iou_loss_func=None,
                                  cross_entropy_weight=0.5, cross_entropy_loss_func=None):
-    """Calculate mixed Dice and Cross Entropy Loss.
+    """Calculate mixed IOU and Cross Entropy Loss.
 
     Args:
         output: Model output of shape (N x H x W x 1).
         target:
-            Target of shape (N x H x W x (1 + K).
-            Where K is number of different weights for Cross Entropy.
+            Target of shape (N x H x W x (1 + K)).
+            Where K is number of different weights for cross entropy.
         iou_weight (float, optional): Weight of Dice loss. Defaults to 0.5.
         iou_loss_func (function, optional): Dice loss function. If None multiclass_dice_loss() is being used.
         cross_entropy_weight (float, optional): Weight of Cross Entropy loss. Defaults to 0.5.
         cross_entropy_loss_func (function, optional):
             Cross Entropy loss function.
-            If None torch.nn.CrossEntropyLoss() is being used.
-        iou_smooth (float, optional): Smoothing factor for Dice loss. Defaults to 0.
+            If None binary cross entropy is being used.
 
     Returns:
         float: Loss value.

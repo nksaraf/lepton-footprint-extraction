@@ -1,3 +1,7 @@
+"""Creates configuration dictionaries for building models, training and prediction. Also
+contains constants to be used in the project.
+"""
+
 import os
 
 from model.connections import Wire

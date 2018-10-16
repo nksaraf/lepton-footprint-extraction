@@ -3,6 +3,21 @@ from model.utils import Iterator
 
 
 class Predictor(Transformer):
+	"""A transformer than takes input data and produces predicted output based on
+	the prediction model that it has
+
+	Input:
+		x: input data, either as an Iterator, as a batch, or entire data set
+		batch_size: required only if x is the entire data set, if batch_size is None, x is treated
+					as a batch itself
+		y: expected output, used for evaluations
+
+	Output:
+		predictions: predictions produced for the input data (x) based on appropriate Keras methods
+
+	Args:
+		predictor: a ``Model`` instance that is used to do the predictions
+	"""
     __out__ = ('predictions', )
 
     def __init__(self, name, predictor, need_setup=True):
@@ -23,6 +38,12 @@ class Predictor(Transformer):
 
 
 class Evaluator(Predictor):
+	""" A predictor-like transformer, but instead of producing predictions, it 
+	produces evaluation of the model on the input data and expected output data.
+
+	Output:
+		evaluation: evaluations for the model based on input data
+	"""
     __out__ = ('evaluation',)
 
     def __transform__(self, x, y=None, batch_size=None):

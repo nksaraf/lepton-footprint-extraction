@@ -4,6 +4,8 @@ import os
 from pycocotools.coco import COCO
 from tqdm import tqdm
 
+"""Support functions for using COCO datasets for other challenges, 
+not needed for our own data"""
 
 def run():
     annofile = "data/mapping_challenge/annotation.json"

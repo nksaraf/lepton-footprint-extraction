@@ -6,6 +6,9 @@ import numpy as np
 import random
 import os
 
+"""Utility functions to display output of model (masks and polygons) easily 
+using matplotlib"""
+
 no_labels = dict(
         axis='both',
         which='both',

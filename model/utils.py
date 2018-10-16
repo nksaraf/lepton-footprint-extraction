@@ -118,6 +118,7 @@ class ModelCheckpoint(Callback):
 
 
 def save_model_weights(model, job_dir, filepath):
+	"""Save model weights to {job_dir}/{filepath}"""
     if job_dir.startswith('gs://'):
         model.save_weights(filepath, overwrite=True)
         copy_file_to_gcs(job_dir, filepath)
@@ -126,6 +127,7 @@ def save_model_weights(model, job_dir, filepath):
 
 
 def save_model(model, job_dir, filepath):
+	"""Save model to {job_dir}/{filepath}"""
     if job_dir.startswith('gs://'):
         model.save(filepath, overwrite=True)
         copy_file_to_gcs(job_dir, filepath)
@@ -134,10 +136,10 @@ def save_model(model, job_dir, filepath):
 
 
 class Iterator(Sequence):
-    """Base class for image data iterators.
+    """Base class for data iterators.
 
-    Every `Iterator` must implement the `_get_batches_of_transformed_samples`
-    method.
+    Every `Iterator` must implement the `next` and `_get_batch`
+    methods
 
     # Arguments
         n: Integer, total number of samples in the dataset to loop over.
@@ -228,6 +230,21 @@ class Iterator(Sequence):
 
 
 class CSVLoader(Transformer):
+	"""A transformer that extracts the necessary columns (with image paths) from a CSV file
+
+	Input:
+		filename: file path to load csv from
+		train_mode: if true, get y data as well, else only x data
+
+	Output:
+		x: data from x_column
+		y: data from y_column, or None if train_mode is False
+
+	Args:
+		x_column: header of column to use for x
+		y_column: header of column to use for y
+		prefix: to add before every path in the columns
+	"""
     __out__ = ('x', 'y')
 
     def __init__(self, name, x_column, y_column, prefix=''):
@@ -249,6 +266,7 @@ class CSVLoader(Transformer):
                 'y': y}
 
 class CSVLoaderXYZ(Transformer):
+	"""A similar transformer to the CSVLoader, with another column"""
     __out__ = ('x', 'y', 'z')
 
     def __init__(self, name, x_column, y_column, prefix=''):
@@ -278,14 +296,10 @@ def save_image(path, x, scale=True):
 
     # Arguments
         path: Path or file object.
-        image: Numpy array.
+        x: Numpy array.
         scale: Whether to rescale image values to be within `[0, 255]`.
     """
     if scale:
-        # x = x + max(-np.min(x), 0)
-        # x_max = np.max(x)
-        # if x_max != 0:
-        #     x /= x_max
         x *= 255
     x = x.astype(np.uint8)
 
@@ -324,18 +338,15 @@ def load_joblib(filepath):
     with open(filepath, 'r') as fp:
         return joblib.load(fp)
 
-
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
-
 
 def save_to_csv(file_path, data, columns, **kwargs):
     df = pd.DataFrame(data=data, columns=columns)
     df = df.dropna()
     with open(file_path, 'w') as fp:
         df.to_csv(fp, **kwargs)
-
 
 def copy_file_to_gcs(job_dir, file_path):
     if job_dir.startswith('gs://'):

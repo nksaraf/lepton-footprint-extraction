@@ -4,6 +4,21 @@ from model.utils import ModelCheckpoint
 
 
 class Trainer(Transformer):
+	"""A transformer that uses the training data provided to fit the model for
+	better prediction. This is an abstract trainer, and there are two implementations of it.
+	XYTrainer: expects the input to be the data itself in X and Y numpy arrays
+	GeneratorTrainer: expects the input to be generators of batches of data
+
+	Input:
+		data: training data
+		validation_data: validation data
+
+	Output:
+		model: trained model
+
+	Args:
+		trainer: ``model.Model`` instance to train using data
+	"""
     __metaclass__ = ABCMeta
     __out__ = ('model',)
 
@@ -29,8 +44,6 @@ class XYTrainer(Trainer):
 
 
 class GeneratorTrainer(Trainer):
-    __out__ = ('model',)
-
     def __transform__(self, datagen, validation_datagen):
         self.log("Training model with generator...")
         self.trainer.create_callbacks(**self.trainer.callbacks_config)

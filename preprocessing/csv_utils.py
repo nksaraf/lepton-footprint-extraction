@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+"""Utility functions to do operations on CSV files that contain indices of filepaths"""
 
 def save_to_csv(file_path, data, columns, **kwargs):
     df = pd.DataFrame(data=data, columns=columns)
@@ -16,7 +17,6 @@ def combine_csvs(columns, file_names=[]):
         table = pd.read_csv(filename, header=0, names=columns, na_filter=False)
         frame = frame.append(table, ignore_index=True)
     return frame
-
 
 def train_val_test_split(file_names, seed, train_filepath, val_filepath, test_filepath, part=1.0):
     columns = ("image_id", "file_path_image", "file_path_mask")
@@ -42,7 +42,6 @@ def create_local_version(filename):
     table['file_path_image'] = table['file_path_image'].map(lambda a: a[12:])
     table['file_path_mask'] = table['file_path_mask'].map(lambda a: a[12:])
     table.to_csv('{}.local.csv'.format(os.path.splitext(filename)[0]), index=False, columns=columns)
-
 
 def datafy(filename):
     columns = ("image_id", "file_path_image", "file_path_mask")

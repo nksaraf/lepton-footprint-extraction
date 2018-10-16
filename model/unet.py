@@ -10,8 +10,17 @@ from resnet101 import ResNet101
 
 logger = print
 
-
 class BaseUNet(object):
+	"""A Keras Unet model based on the https://arxiv.org/abs/1505.04597 paper.
+	It is the state of the art for semantic segmentation. Highly customizable.
+
+	# Arguments:
+		input_shape: shape of input image (h, w)
+		in_channles: number of channle in input image
+		out_channels: number of channels in mask (must match training data output)
+		num_filters: number of filters in the first layer after the input layer
+		depth: number of layers in the encoder/decoder
+	"""
     def build_model(self, input_shape, in_channels=3, out_channels=1, num_filters=64, depth=4, activation='relu',
                     dropout=0.5, batch_norm=False, maxpool=True, is_deconv=True, residual=False, inc_rate=2.,
                     l2_reg=0.0001):
@@ -48,6 +57,7 @@ class BaseUNet(object):
 
 
 class UNetResNet101(object):
+	"""A Keras Unet model that uses the Resnet101 model as its encoder"""
     def __init__(self):
         self.encoder = None
 
